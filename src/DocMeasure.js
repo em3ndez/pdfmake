@@ -85,6 +85,9 @@ class DocMeasure {
 			let factor = (dimensions.width / dimensions.height > node.fit[0] / node.fit[1]) ? node.fit[0] / dimensions.width : node.fit[1] / dimensions.height;
 			node._width = node._minWidth = node._maxWidth = dimensions.width * factor;
 			node._height = dimensions.height * factor;
+		} else if (node.cover) {
+			node._width = node._minWidth = node._maxWidth = node.cover.width;
+			node._height = node._minHeight = node._maxHeight = node.cover.height;
 		} else {
 			node._width = node._minWidth = node._maxWidth = node.width || dimensions.width;
 			node._height = node.height || (dimensions.height * node._width / dimensions.width);
@@ -125,7 +128,13 @@ class DocMeasure {
 		this.convertIfBase64Image(node);
 
 		let image = this.pdfDocument.provideImage(node.image);
+
 		let imageSize = { width: image.width, height: image.height };
+
+		// If EXIF orientation calls for it, swap width and height
+		if (image.orientation > 4) {
+			imageSize = { width: image.height, height: image.width };
+		}
 
 		this.measureImageWithDimensions(node, imageSize);
 
@@ -430,16 +439,17 @@ class DocMeasure {
 				if (item.listMarker._inlines) {
 					node._gapSize.width = Math.max(node._gapSize.width, item.listMarker._inlines[0].width);
 				}
-			}  // TODO: else - nested lists numbering
+
+				if (node.reversed) {
+					counter--;
+				} else {
+					counter++;
+				}
+			}
 
 			node._minWidth = Math.max(node._minWidth, items[i]._minWidth);
 			node._maxWidth = Math.max(node._maxWidth, items[i]._maxWidth);
 
-			if (node.reversed) {
-				counter--;
-			} else {
-				counter++;
-			}
 		}
 
 		node._minWidth += node._gapSize.width;

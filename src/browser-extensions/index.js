@@ -6,7 +6,7 @@ import configurator from 'core-js/configurator';
 
 // core-js: Polyfills will be used only if natives completely unavailable.
 configurator({
-  useNative: ['Promise']
+	useNative: ['Promise']
 });
 
 let defaultClientFonts = {
@@ -21,7 +21,7 @@ let defaultClientFonts = {
 class pdfmake extends pdfmakeBase {
 	constructor() {
 		super();
-		this.urlResolver = new URLBrowserResolver(this.virtualfs);
+		this.urlResolver = () => new URLBrowserResolver(this.virtualfs);
 		this.fonts = defaultClientFonts;
 	}
 
